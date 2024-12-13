@@ -1,17 +1,17 @@
 import json
 import os
 import logging
+import asyncio
 
 from flask import Flask, request, jsonify
 from openai import AzureOpenAI
 from azure.ai.inference.tracing import AIInferenceInstrumentor
 from azure.ai.projects.aio import AIProjectClient
 from azure.identity import DefaultAzureCredential
+from azure.monitor.opentelemetry import configure_azure_monitor
 
 from opentelemetry import trace
 from opentelemetry.trace import get_tracer
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
 
 from services.booking import book_flight, book_flight_tool
 from services.search import search_index, search_tool
@@ -21,24 +21,32 @@ app = Flask(__name__)
 log = app.logger
 log.setLevel(logging.DEBUG)
 
-# Initialisation de l'instrumentation OpenTelemetry
-AIInferenceInstrumentor().instrument()
-span_exporter = ConsoleSpanExporter()
-tracer_provider = TracerProvider()
-tracer_provider.add_span_processor(SimpleSpanProcessor(span_exporter))
-trace.set_tracer_provider(tracer_provider)
 tracer = get_tracer(__name__)
 
-project = AIProjectClient.from_connection_string(
-    conn_str=os.environ.get('AZURE_PROJECT_CONNECTION_STRING'),
-    credential=DefaultAzureCredential())
+async def initialize_monitoring():
+    project = AIProjectClient.from_connection_string(
+        conn_str=os.environ.get('AZURE_PROJECT_CONNECTION_STRING'),
+        credential=DefaultAzureCredential()
+    )
 
-# Initialisez le client Azure OpenAI
+    # Enable instrumentation of AI packages (inference, agents, openai, langchain)
+    project.telemetry.enable()
+
+    # Log traces to the project's application insights resource
+    application_insights_connection_string = await project.telemetry.get_connection_string()
+    if application_insights_connection_string:
+        configure_azure_monitor(
+            connection_string=application_insights_connection_string,
+            enable_live_metrics=True)
+
+# Initialize the project client
+asyncio.run(initialize_monitoring())
+
 openai_client = AzureOpenAI(
+    azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYMENT'),
     azure_endpoint=os.environ.get('AZURE_OPENAI_ENDPOINT'),
     api_key=os.environ.get('AZURE_OPENAI_KEY'),
-    api_version=os.environ.get('AZURE_OPENAI_API_VERSION'),
-    azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYMENT')
+    api_version=os.environ.get('AZURE_OPENAI_API_VERSION')
 )
 
 tools = [
@@ -75,7 +83,17 @@ def chat(query: str = None):
             if function_name == 'book_flight':
                 result = book_flight(arguments['destination'], arguments['date'])
             elif function_name == 'search_index':
-                result = search_index(arguments['query'])
+                search_result = search_index(query)
+                messages.append({"role": "assistant", "content": search_result['results']})
+
+                log.debug("Received %s results, calling LLM to generate final answer ", len(messages))
+                response = openai_client.chat.completions.create(
+                    messages=messages,
+                    model=os.environ.get('AZURE_OPENAI_DEPLOYMENT')
+                )
+                messages.append({"role": "assistant", "content": response.choices[0].message.content})
+                result = messages
+
             else:
                 result = {"message": "Function not recognized"}
     else:
@@ -84,5 +102,10 @@ def chat(query: str = None):
 
     return jsonify(result), 200
 
+
+
 if __name__ == '__main__':
+    # Initialisation de l'instrumentation OpenTelemetry
+    AIInferenceInstrumentor().instrument(enable_content_recording=True)
+    
     app.run(debug=True)
