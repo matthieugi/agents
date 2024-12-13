@@ -9,7 +9,7 @@ import pandas as pd
 from pprint import pprint
 
 from azure.identity import DefaultAzureCredential
-from azure.ai.evaluation import evaluate, RelevanceEvaluator, FluencyEvaluator, GroundednessEvaluator, CoherenceEvaluator
+from azure.ai.evaluation import evaluate, RelevanceEvaluator, FluencyEvaluator, GroundednessEvaluator, CoherenceEvaluator, ViolenceEvaluator, SexualEvaluator, SelfHarmEvaluator, IndirectAttackEvaluator
 
 # #custom metrics
 # from custom_evaluators import FriendlinessEvaluator, CompletenessEvaluator
@@ -40,6 +40,12 @@ def run_evaluation(eval_name, dataset_path):
     relevance_eval = RelevanceEvaluator(model_config)
     fluency_eval = FluencyEvaluator(model_config)
     coherence_eval = CoherenceEvaluator(model_config)
+    
+    violence_eval = ViolenceEvaluator(azure_ai_project=azure_ai_project, credential=DefaultAzureCredential())
+    sexual_eval = SexualEvaluator(azure_ai_project=azure_ai_project, credential=DefaultAzureCredential())
+    self_harm_eval = SelfHarmEvaluator(azure_ai_project=azure_ai_project, credential=DefaultAzureCredential())
+    indirect_attack_eval = IndirectAttackEvaluator(azure_ai_project=azure_ai_project, credential=DefaultAzureCredential())
+
 
     # #custom eval
     # friendliness_eval = FriendlinessEvaluator()
@@ -59,8 +65,10 @@ def run_evaluation(eval_name, dataset_path):
             "relevance": relevance_eval,
             "fluency": fluency_eval,
             "coherence": coherence_eval,
-            # "friendliness": friendliness_eval,
-            # #"completeness": completeness_eval
+            "violence": violence_eval,
+            "sexual": sexual_eval,
+            "self_harm": self_harm_eval,
+            "indirect_attack": indirect_attack_eval,
         },
         evaluator_config={
             "groundedness": {
@@ -88,14 +96,36 @@ def run_evaluation(eval_name, dataset_path):
                     "response": "${data.response}"
                 }
             },
-            # "friendliness": {"response": "${target.answer}"},
-            #"completeness": {"question": "${data.chat_input}"}
+            "violence": {
+                "column_mapping": {
+                    "query": "${data.query}",
+                    "response": "${data.response}"
+                }
+            },
+            "sexual": {
+                "column_mapping": {
+                    "query": "${data.query}",
+                    "response": "${data.response}"
+                }
+            },
+            "self_harm": {
+                "column_mapping": {
+                    "query": "${data.query}",
+                    "response": "${data.response}"
+                }
+            },
+            "indirect_attack": {
+                "column_mapping": {
+                    "query": "${data.query}",
+                    "response": "${data.response}",
+                    "context": "${data.context}"
+                }
+            },
         },
         azure_ai_project=azure_ai_project
     )
     
     tabular_result = pd.DataFrame(result.get("rows"))
-    # UPCOMING: this line will be handled by output_path in evaluate function
     tabular_result.to_json(output_path, orient="records", lines=True) 
 
     return result, tabular_result

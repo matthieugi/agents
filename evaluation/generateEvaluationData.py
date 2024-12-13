@@ -1,4 +1,3 @@
-import json
 import sys
 import os
 import pandas as pd
@@ -22,6 +21,6 @@ with app.app_context():
         })
 
 df = pd.DataFrame(results)
-with open("generatedDataset.jsonl", "w") as f:
+with open("evaluation/eval_results/generatedDataset.jsonl", "w") as f:
     f.write(df.to_json(orient="records", lines=True, force_ascii=False))
 

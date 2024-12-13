@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify
 from openai import AzureOpenAI
 from azure.ai.inference.tracing import AIInferenceInstrumentor
 from azure.ai.projects.aio import AIProjectClient
+from azure.core.settings import settings
 from azure.identity import DefaultAzureCredential
 from azure.monitor.opentelemetry import configure_azure_monitor
 
@@ -20,6 +21,10 @@ from services.search import search_index, search_tool
 app = Flask(__name__)
 log = app.logger
 log.setLevel(logging.DEBUG)
+settings.tracing_implementation = "opentelemetry"
+
+# Initialisation de l'instrumentation OpenTelemetry
+AIInferenceInstrumentor().instrument(enable_content_recording=True)
 
 tracer = get_tracer(__name__)
 
@@ -38,6 +43,13 @@ async def initialize_monitoring():
         configure_azure_monitor(
             connection_string=application_insights_connection_string,
             enable_live_metrics=True)
+    
+    project.inference.get_azure_openai_client(
+        deployment=os.environ.get('AZURE_OPENAI_DEPLOYMENT'),
+        endpoint=os.environ.get('AZURE_OPENAI_ENDPOINT'),
+        api_key=os.environ.get('AZURE_OPENAI_KEY'),
+        api_version=os.environ.get('AZURE_OPENAI_API_VERSION')
+    )
 
 # Initialize the project client
 asyncio.run(initialize_monitoring())
@@ -102,10 +114,5 @@ def chat(query: str = None):
 
     return jsonify(result), 200
 
-
-
 if __name__ == '__main__':
-    # Initialisation de l'instrumentation OpenTelemetry
-    AIInferenceInstrumentor().instrument(enable_content_recording=True)
-    
-    app.run(debug=True)
+    app.run(debug=True, port=os.environ.get('PORT', 5000))
