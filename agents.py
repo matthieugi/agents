@@ -3,9 +3,9 @@ from autogen import ConversableAgent, UserProxyAgent, GroupChat, GroupChatManage
 llm_config = {
         'config_list': [{
             'model': 'gpt-4o',
-            'base_url': 'https://ceos-swe.openai.azure.com/',
+            'base_url': os.environ.get['AZURE_OPENAI_ENDPOINT'],
             'api_type': 'azure',
-            'api_key': '10fac90530b3477087d056b017d1c34b',
+            'api_key': os.environ.get['AZURE_OPENAI_API_KEY'],
             'api_version': '2023-12-01-preview'
         }] 
     }
