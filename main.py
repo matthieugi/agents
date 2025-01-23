@@ -43,7 +43,7 @@ async def initialize_monitoring():
 asyncio.run(initialize_monitoring())
 
 openai_client = AzureOpenAI(
-    azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYMENT'),
+    # azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYMENT'),
     azure_endpoint=os.environ.get('AZURE_OPENAI_ENDPOINT'),
     api_key=os.environ.get('AZURE_OPENAI_KEY'),
     api_version=os.environ.get('AZURE_OPENAI_API_VERSION')
