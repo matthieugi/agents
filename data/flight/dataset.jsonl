@@ -10,20 +10,3 @@
 {"query": "Quels accessoires sont acceptés en cabine en supplément du bagage ?", "context": "En supplément de votre bagage en cabine, vous pouvez emporter 1 accessoire personnel, dont les dimensions maximum sont de 40 x 30 x 15 cm. Vous pouvez transporter au choix : 1 sac à main, ou 1 sacoche, ou 1 sacoche pour ordinateur portable, appareil photo ou tout autre appareil électronique.", "response": "Vous pouvez emporter un sac à main ou un sac pour ordinateur portable en supplément de votre bagage en cabine.", "ground_truth": "En supplément de votre bagage en cabine, vous pouvez emporter 1 accessoire personnel, dont les dimensions maximum sont de 40 x 30 x 15 cm. Vous pouvez transporter au choix : 1 sac à main, ou 1 sacoche, ou 1 sacoche pour ordinateur portable, appareil photo ou tout autre appareil électronique."}
 {"query": "Quels produits sont autorisés en cabine ?", "context": "En cabine, vous pouvez transporter des liquides, des pâtes et des crèmes, selon les conditions suivantes : les contenants doivent être placés dans un sac en plastique transparent fermé, chaque contenant dans le sac ne doit pas dépasser 100 ml, le volume du sac ne doit pas dépasser 1 litre, les dimensions maximales du sac doivent être de 20 x 20 cm.", "response": "Vous pouvez transporter des liquides en cabine sans restriction de volume.", "ground_truth": "En cabine, vous pouvez transporter des liquides, des pâtes et des crèmes, selon les conditions suivantes : les contenants doivent être placés dans un sac en plastique transparent fermé, chaque contenant dans le sac ne doit pas dépasser 100 ml, le volume du sac ne doit pas dépasser 1 litre, les dimensions maximales du sac doivent être de 20 x 20 cm."}
 {"query": "Quelles sont les règles pour le transport des équipements de sport ?", "context": "Vous souhaitez voyager avec votre équipement de sport ? Aucun problème ! Assurez-vous simplement qu'il ne dépasse pas 23 kg / 50 lb (ou 32 kg / 70 lb dans les cabines Business et La Première) et que ses dimensions totales ne dépassent pas 300 cm / 118 pouces*. Dans certains cas, vous devrez obtenir l'autorisation préalable de notre service client.", "response": "Les équipements de sport ne sont pas autorisés à bord.", "ground_truth": "Assurez-vous simplement qu'il ne dépasse pas 23 kg / 50 lb (ou 32 kg / 70 lb dans les cabines Business et La Première) et que ses dimensions totales ne dépassent pas 300 cm / 118 pouces*. Dans certains cas, vous devrez obtenir l"}
-// {"conversation": [
-//     {
-//         "role": "user",
-//         "content": "Quels sont les tarifs pour les enfants de plus de 2 ans lors de la réservation ?"
-//     },
-//     {
-//         "role": "assistant",
-//         "content": "Les enfants de plus de 2 ans bénéficient de réductions allant jusqu'à 50 % sur tous les vols."
-//     },
-//     {
-//         "role": "user",
-//         "content": "Si votre enfant a plus de 2 ans Lorsqu'il voyage avec vous, si le tarif le permet"
-//     }
-// ],
-// "context": "Si votre enfant a plus de 2 ans Lorsqu'il voyage avec vous, si le tarif le"
-
-// }
