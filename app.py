@@ -1,66 +1,83 @@
 import os
-import json
-import streamlit as st
-from openai import AzureOpenAI
-from services.booking import book_flight_tool, book_flight
-from services.search import search_tool, search_index
 
-# Initialiser le client OpenAI
-openai_client = AzureOpenAI(
-    azure_endpoint=os.environ.get('AZURE_OPENAI_ENDPOINT'),
-    api_key=os.environ.get('AZURE_OPENAI_KEY'),
-    api_version=os.environ.get('AZURE_OPENAI_API_VERSION')
+from azure.identity import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient
+from azure.ai.inference.prompts import PromptTemplate
+
+from services.quote import quote_agent, quote
+from services.attestation import attestation_agent, attestation
+from services.advice import advice_agent, advice
+
+
+project = AIProjectClient.from_connection_string(
+  conn_str=os.environ.get('AZURE_AI_PROJECT_CONNECTION_STRING'),
+  credential=DefaultAzureCredential())
+
+
+orchestrator_client = project.inference.get_azure_openai_client(
+  api_version=os.environ.get('AZURE_OPENAI_API_VERSION'),
+
 )
 
+orchestrator_system_prompt = PromptTemplate.from_string(prompt_template="""
+    assistant:
+        You are an AI assistant that helps classify user requests 
+        If you are able to classify the user request, levereage the appropriate tool.
+        If you are unable to classify the user request or do not have the necessary information, respond with "None".
+        
+
+    user:                                                        
+    {{user_query}}
+    """)
+
 tools = [
-    book_flight_tool,
-    search_tool
+    quote_agent,
+    attestation_agent,
+    advice_agent
 ]
 
 # Fonction pour traiter la requête
-def process_query(query):
-    client_response = openai_client.chat.completions.create(
-        messages=st.session_state.messages,
+def process_query(user_id, user_query):
+    messages = orchestrator_system_prompt.create_messages(user_query=user_query)
+    
+    client_response = orchestrator_client.chat.completions.create(
+        messages=messages,
         tools=tools,
-        model=os.environ.get('AZURE_OPENAI_DEPLOYMENT')
+        model=os.environ.get('AZURE_CHAT_DEPLOYMENT')
     )
 
     assistant_message = client_response.choices[0].message
 
-    if assistant_message.tool_calls:
-        for tool in assistant_message.tool_calls:
-            st.write(f"Tool call: {tool.function.name}")
-            function_name = tool.function.name
-            arguments = json.loads(tool.function.arguments)
+    if not assistant_message.tool_calls:
+        return assistant_message
 
-            if function_name == 'book_flight':
-                result = book_flight(arguments['destination'], arguments['date'])
-                st.write(result)
-            elif function_name == 'search_index':
-                search_result = search_index(query)
-                st.session_state.messages.append({"role": "assistant", "content": search_result['results']})
+    
+    for tool in assistant_message.tool_calls:
+        function_name = tool.function.name
+        result = None
 
-                st.write(f"Received {len(st.session_state.messages)} results, calling LLM to generate final answer")
-                client_response = openai_client.chat.completions.create(
-                    messages=st.session_state.messages,
-                    model=os.environ.get('AZURE_OPENAI_DEPLOYMENT')
-                )
-                assistant_message = client_response.choices[0].message
+        match function_name:
+            case 'quote':
+                result = quote(user_id, messages)
+                messages.append({"role": "assistant", "content": result})
+            case 'attestation':
+                result = attestation(user_id, messages)
+                messages.append({"role": "assistant", "content": result})
+            case 'advice':
+                result = advice(messages)
+                messages.append({"role": "assistant", "content": result})
 
-    return assistant_message
+    return result
 
-# Interface utilisateur Streamlit
-st.title("Chat with your airline assistant ✈️")
 
-if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+user_query = "je cherche à faire assurer ma nouvelle maison"
+result = process_query('matthieu', user_query)
+print(result)
 
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+user_query = "je veux une attestation d'assurance"
+result = process_query('matthieu', user_query)
+print(result)
 
-if prompt := st.chat_input():
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
-    msg = process_query(prompt).content
-    st.session_state.messages.append({"role": "assistant", "content": msg})
-    st.chat_message("assistant").write(msg)
+user_query = "je fais du parapente, avez-vous des conseils ?"
+result = process_query('matthieu', user_query)
+print(result)
