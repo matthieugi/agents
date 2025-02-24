@@ -3,7 +3,4 @@
 .cache
 __pycache__
 evaluation/eval_results
-<<<<<<< HEAD
 .azure
-=======
->>>>>>> eb28374 (add stremlit app and debug options)
