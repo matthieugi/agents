@@ -147,8 +147,6 @@ if __name__ == "__main__":
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT = "text-embedding-3-large"
     EMBEDDINGS_DIMENSIONS = 3072
 
-    azure_credential = AzureDeveloperCliCredential(tenant_id=os.environ["AZURE_TENANT_ID"], process_timeout=60)
-
     setup_index(
         index_name=AZURE_SEARCH_INDEX, 
         azure_openai_embedding_deployment=AZURE_OPENAI_EMBEDDING_DEPLOYMENT)

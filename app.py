@@ -8,6 +8,8 @@ from azure.monitor.opentelemetry import configure_azure_monitor
 from azure.core.settings import settings
 from opentelemetry import trace
 
+from flask import Flask, request, jsonify
+
 tracer = trace.get_tracer(__name__)
 
 settings.tracing_implementation = "opentelemetry"
@@ -39,7 +41,7 @@ orchestrator_system_prompt = PromptTemplate.from_string(prompt_template="""
     assistant:
         You are an AI assistant that helps classify user requests 
         If you are able to classify the user request, levereage the appropriate tool.
-        If you are unable to classify the user request or do not have the necessary information, respond with "None".
+        If you are unable to classify the user request, levereage the advice tool.
         
 
     user:                                                        
@@ -69,10 +71,12 @@ answer_system_prompt = PromptTemplate.from_string(prompt_template="""
         {{user_query}}
     """)
 
+app = Flask(__name__)
+
 
 @tracer.start_as_current_span(name="orchestrator")
-# Fonction pour traiter la requête
-def process_query(user_id, user_query):
+@app.route('/process', methods=['POST'])
+def process(user_id: str = None, user_query: str = None):
     messages = orchestrator_system_prompt.create_messages(user_query=user_query)
     
     orchestrator_client_response = ai_chat_client.chat.completions.create(
@@ -84,7 +88,7 @@ def process_query(user_id, user_query):
     orchestrator_response_message = orchestrator_client_response.choices[0].message
 
     if not orchestrator_response_message.tool_calls:
-        return orchestrator_response_message
+        return { "role": "assistant", "content": orchestrator_response_message.content }
 
     assistants_answers = []
     
@@ -110,19 +114,9 @@ def process_query(user_id, user_query):
         model=os.environ.get('AZURE_CHAT_DEPLOYMENT')
     )
 
-    answer_client_message = answer_client_response.choices[0].message.content
+    answer_client_message_content = answer_client_response.choices[0].message.content
 
-    return answer_client_message
+    return  { "role": "assistant", "content": answer_client_message_content }
 
-
-user_query = "je cherche à faire assurer ma nouvelle maison pour y héberger mes 6 chiens, quelles sont les garanties possibles et combien cela me couterait-il ?"
-result = process_query('matthieu', user_query)
-print(result)
-
-# user_query = "je veux une attestation d'assurance"
-# result = process_query('matthieu', user_query)
-# print(result)
-
-# user_query = "je fais du parapente, avez-vous des conseils ?"
-# result = process_query('matthieu', user_query)
-# print(result)
+if __name__ == '__main__':
+    app.run(debug=True, port=os.environ.get('PORT', 5000))

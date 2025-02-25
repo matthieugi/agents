@@ -2,5 +2,5 @@
 .venv
 .cache
 __pycache__
-evaluation/eval_results
+evaluation/generated_datasets/*
 .azure
