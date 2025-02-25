@@ -25,7 +25,7 @@ _search_connection = _project.connections.get(
 _search_client = SearchClient(
     endpoint=_search_connection.endpoint_url, 
     credential=AzureKeyCredential(_search_connection.key), 
-    index_name=os.environ.get('AZURE_SEARCH_INDEX_NAME', 'insurance'))
+    index_name=os.environ.get('AZURE_SEARCH_INDEX', 'insurance'))
 
 advice_agent = {
     "type": "function",
