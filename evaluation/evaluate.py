@@ -11,9 +11,6 @@ from pprint import pprint
 from azure.identity import DefaultAzureCredential
 from azure.ai.evaluation import evaluate, RelevanceEvaluator, FluencyEvaluator, GroundednessEvaluator, CoherenceEvaluator, ViolenceEvaluator, SexualEvaluator, SelfHarmEvaluator, IndirectAttackEvaluator
 
-# #custom metrics
-# from custom_evaluators import FriendlinessEvaluator, CompletenessEvaluator
-
 
 # Define helper methods
 def load_jsonl(path):

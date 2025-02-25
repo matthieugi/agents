@@ -9,3 +9,4 @@ azure-ai-evaluation
 azure-monitor-opentelemetry
 azure-search-documents==11.6.0b1
 opentelemetry-instrumentation-openai-v2
+pandas
