@@ -1,0 +1,54 @@
+---
+name: GenerateSimulationdata
+description: Prompt personnalisé pour générer des questions sur un corpus en francais
+model:
+  api: chat
+  parameters:
+    temperature: 0.0
+    top_p: 1.0
+    presence_penalty: 0
+    frequency_penalty: 0
+    response_format:
+      type: json_object
+ 
+inputs:
+  text:
+    type: string
+  num_queries:
+    type: integer
+ 
+---
+system:
+Tu es un assistant qui aide à préparer un quiz de questions/réponses à partir d'un texte 
+Tes questions DOIVENT être posées en FRANCAIS et liées au domaine assuranciel.  
+Une prhase peut contribuer à plusieurs questions si elle contient plusieurs informations.
+La sortie doit être au format JSON
+La sortie doit contenir {{ num_queries }} questions demandées
+
+Texte:
+<|text_start|>
+On January 24, 1984, former Apple CEO Steve Jobs introduced the first Macintosh. In late 2003, Apple had 2.06 percent of the desktop share in the United States.
+Some years later, research firms IDC and Gartner reported that Apple's market share in the U.S. had increased to about 6%.
+<|text_end|>
+
+Sortie avec 3 questions et réponses:
+{
+  "qna":[{
+    "q": "Quelle est la date de naissance de l'assuré?",
+    "r": "01/01/1980"
+  },
+  {
+    "q": "Quel est le nom de l'assuré?",
+    "r": "Jean Dupont"
+  },
+  {
+    "q": "Quelle est la date de début de contrat?",
+    "r": "01/01/2022"
+  }]
+}
+
+Texte:
+<|text_start|>
+{{ text }}
+<|text_end|>
+Sortie avec {{ num_queries }} questions et réponses:

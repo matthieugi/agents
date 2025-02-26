@@ -9,7 +9,7 @@
             "name": "Python Debugger: Main",
             "type": "debugpy",
             "request": "launch",
-            "module": "main",
+            "module": "app",
             "justMyCode": false,
         },
         {
@@ -18,6 +18,14 @@
             "request": "launch",
             "module": "streamlit",
             "args": ["run", "app.py"],
+            "justMyCode": false,
+        },
+        {
+            "name": "Python Debugger: Generate Simulation Data",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "evaluation.generate_simulation_data",
+            "subProcess": true,
             "justMyCode": false,
         }
     ]

@@ -8,12 +8,20 @@ load_dotenv()
 import pandas as pd
 from pprint import pprint
 
+from azure.core.settings import settings
 from azure.identity import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient
 from azure.ai.evaluation import evaluate, RelevanceEvaluator, FluencyEvaluator, GroundednessEvaluator, CoherenceEvaluator, ViolenceEvaluator, SexualEvaluator, SelfHarmEvaluator, IndirectAttackEvaluator
 
-# #custom metrics
-# from custom_evaluators import FriendlinessEvaluator, CompletenessEvaluator
+settings.tracing_implementation = "opentelemetry"
 
+project = AIProjectClient.from_connection_string(
+  conn_str=os.environ.get('AZURE_AI_PROJECT_CONNECTION_STRING'),
+  credential=DefaultAzureCredential())
+
+openai_client = project.inference.get_azure_openai_client(
+  api_version=os.environ.get('AZURE_OPENAI_API_VERSION')
+)
 
 # Define helper methods
 def load_jsonl(path):
@@ -23,16 +31,15 @@ def load_jsonl(path):
 def run_evaluation(eval_name, dataset_path):
 
     azure_ai_project = {
-        "subscription_id": os.environ.get("AZURE_SUBSCRIPTION_ID"),
-        "resource_group_name": os.environ.get("AZURE_RESOURCE_GROUP"),
-        "project_name": os.environ.get("AZURE_PROJECT_NAME"),
+        "subscription_id": project.scope.get("subscription_id"),
+        "resource_group_name": project.scope.get("resource_group_name"),
+        "project_name": project.scope.get("project_name"),
     }
 
-    model_config = {
-        "azure_endpoint": os.environ["AZURE_OPENAI_ENDPOINT"],
-        "azure_deployment": os.environ["AZURE_OPENAI_DEPLOYMENT"],
-        "api_key": os.environ["AZURE_OPENAI_KEY"],
-        "api_version": os.environ["AZURE_OPENAI_API_VERSION"]
+    model_config= {
+        "azure_endpoint": f'https://{openai_client.base_url.host}',
+        "azure_deployment": os.environ.get('AZURE_CHAT_DEPLOYMENT'),
+        "api_key": openai_client.api_key,
     }
 
     # Initializing Evaluators
@@ -55,7 +62,7 @@ def run_evaluation(eval_name, dataset_path):
     # performs consistently better across a larger set of inputs
     path = str(pathlib.Path.cwd() / dataset_path)
 
-    output_path = str(pathlib.Path.cwd() / "evaluation/eval_results/eval_results.jsonl")
+    output_path = str(pathlib.Path.cwd() / "evaluation/generated_datasets/insurance_global_evaluation_results_fr.jsonl")
 
     result = evaluate(
         evaluation_name=eval_name,
@@ -74,7 +81,7 @@ def run_evaluation(eval_name, dataset_path):
             "groundedness": {
                 "column_mapping": {
                     "query": "${data.query}",
-                    "context": "${data.context}",
+                    "context": "${data.ground_truth}",
                     "response": "${data.response}"
                 }
             },
@@ -118,7 +125,7 @@ def run_evaluation(eval_name, dataset_path):
                 "column_mapping": {
                     "query": "${data.query}",
                     "response": "${data.response}",
-                    "context": "${data.context}"
+                    "context": "${data.ground_truth}"
                 }
             },
         },
@@ -145,6 +152,6 @@ if __name__ == "__main__":
 
     pprint("-----Summarized Metrics-----")
     pprint(result["metrics"])
-    pprint("-----Tabular Result-----")
+    pprint("-------Tabular Result-------")
     pprint(tabular_result)
     pprint(f"View evaluation results in AI Studio: {result['studio_url']}")
