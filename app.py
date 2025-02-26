@@ -74,8 +74,8 @@ answer_system_prompt = PromptTemplate.from_string(prompt_template="""
 app = Flask(__name__)
 
 
-@tracer.start_as_current_span(name="orchestrator")
 @app.route('/process', methods=['POST'])
+@tracer.start_as_current_span(name="orchestrator")
 def process(user_id: str = None, user_query: str = None):
     messages = orchestrator_system_prompt.create_messages(user_query=user_query)
     
@@ -118,5 +118,7 @@ def process(user_id: str = None, user_query: str = None):
 
     return  { "role": "assistant", "content": answer_client_message_content }
 
-if __name__ == '__main__':
-    app.run(debug=True, port=os.environ.get('PORT', 5000))
+# if __name__ == '__main__':
+#     app.run(debug=True, port=os.environ.get('PORT', 5000))
+
+process("user_id", "est-ce que tu peux me générer un devis pour une assurance habitation, qui doit démarrer demain 27/02 et j'aimerais savoir quelle est sont les protections sur l'hébergement de chat ?")
