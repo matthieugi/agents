@@ -3,17 +3,16 @@ import os
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
 from azure.ai.inference.prompts import PromptTemplate
-from azure.ai.inference.tracing import AIInferenceInstrumentor
 from azure.monitor.opentelemetry import configure_azure_monitor
 from azure.core.settings import settings
 from opentelemetry import trace
+from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
 
-from flask import Flask, request, jsonify
+from flask import Flask
 
 tracer = trace.get_tracer(__name__)
-
 settings.tracing_implementation = "opentelemetry"
-AIInferenceInstrumentor().instrument(enable_content_recording=True)
+OpenAIInstrumentor().instrument()
 
 from services.quote import quote_agent, quote
 from services.attestation import attestation_agent, attestation
@@ -24,18 +23,14 @@ project = AIProjectClient.from_connection_string(
   conn_str=os.environ.get('AZURE_AI_PROJECT_CONNECTION_STRING'),
   credential=DefaultAzureCredential())
 
-# Enable instrumentation of AI packages (inference, agents, openai, langchain)
-project.telemetry.enable()
+ai_chat_client = project.inference.get_azure_openai_client(
+  api_version=os.environ.get('AZURE_OPENAI_API_VERSION'),
+)
 
 # Log traces to the project's application insights resource
 application_insights_connection_string = project.telemetry.get_connection_string()
 if application_insights_connection_string:
     configure_azure_monitor(connection_string=application_insights_connection_string)
-
-
-ai_chat_client = project.inference.get_azure_openai_client(
-  api_version=os.environ.get('AZURE_OPENAI_API_VERSION'),
-)
 
 orchestrator_system_prompt = PromptTemplate.from_string(prompt_template="""
     assistant:
@@ -60,6 +55,7 @@ answer_system_prompt = PromptTemplate.from_string(prompt_template="""
         Use the user query and the assistant responses to generate the response.
         If you are not able to generate a response, aswer that your current capabilities do not allow you to response the user intent.
         Use only the contextual data to answer the user query.
+        If you see that a previous message shares a generation of quote, inform the user that the quote has been generated and sent through email.
     
     history:
         {{messages}}
@@ -121,4 +117,4 @@ def process(user_id: str = None, user_query: str = None):
 # if __name__ == '__main__':
 #     app.run(debug=True, port=os.environ.get('PORT', 5000))
 
-process("user_id", "est-ce que tu peux me générer un devis pour une assurance habitation, qui doit démarrer demain 27/02 et j'aimerais savoir quelle est sont les protections sur l'hébergement de chat ?")
+process("matthieu", "I would like to get an insurance for my car. Also I will be travelling abroad with it and would like to know what is the policy in case of an accident.")

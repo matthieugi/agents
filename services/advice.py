@@ -1,6 +1,7 @@
 import os
 
 from opentelemetry.trace import get_tracer
+import trace
 
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential

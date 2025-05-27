@@ -42,7 +42,7 @@ openai_client = project.inference.get_azure_openai_client(
 )
 
 seach_connection = project.connections.get(
-    connection_name=os.environ.get('AZURE_SEARCH_CONNECTION_NAME'),
+    connection_name=os.environ.get('AZURE_SEARCH_CONNECTION_NAME_2'),
     include_credentials=True
 )
 
@@ -59,15 +59,14 @@ def setup_index(index_name, azure_openai_embedding_deployment):
                 name=index_name,
                 fields=[
                     SearchableField(name="chunk_id", key=True, analyzer_name="keyword", sortable=True),
-                    SimpleField(name="category", type=SearchFieldDataType.String, filterable=True),
-                    SearchableField(name="title"),
-                    SearchableField(name="chunk"),
+                    # SimpleField(name="", type=SearchFieldDataType.String, filterable=True),
+                    SearchableField(name="company"),
+                    SearchableField(name="description", analyzer_name="en.microsoft"),
                     SearchField(
-                        name="text_vector", 
+                        name="description_vector", 
                         type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
                         vector_search_dimensions=EMBEDDINGS_DIMENSIONS,
                         vector_search_profile_name="vp",
-                        stored=True,
                         hidden=False)
                 ],
                 vector_search=VectorSearch(
@@ -92,7 +91,7 @@ def setup_index(index_name, azure_openai_embedding_deployment):
                     configurations=[
                         SemanticConfiguration(
                             name="default",
-                            prioritized_fields=SemanticPrioritizedFields(title_field=SemanticField(field_name="title"), content_fields=[SemanticField(field_name="chunk")])
+                            prioritized_fields=SemanticPrioritizedFields(title_field=SemanticField(field_name="company"), content_fields=[SemanticField(field_name="description")])
                         )
                     ],
                     default_configuration_name="default"
@@ -110,17 +109,16 @@ def upload_documents(index_name, azure_openai_embedding_deployment):
         )
         return response.data[0].embedding
 
-    with open("data/insurance/faq.json", "r") as file:
+    with open("data/indiahack/data.json", "r") as file:
         faq = json.load(file)
         faq_documents = []
 
         for i, item in enumerate(faq):
             faq_documents.append({
                 "chunk_id": str(uuid.uuid4()),
-                "category": item["category"],
-                "title": item["title"],
-                "chunk": item["chunk"],
-                "text_vector": generate_embeddings(item["chunk"])
+                "company": item["company"],
+                "description": item["description"],
+                "description_vector": generate_embeddings(item["description"])
             })
         
         search_client.upload_documents(faq_documents)
@@ -143,7 +141,7 @@ if __name__ == "__main__":
         logger.info("Setting up Azure AI Search index and integrated vectorization...")
 
     # Used to name index, indexer, data source and skillset
-    AZURE_SEARCH_INDEX = os.environ["AZURE_SEARCH_INDEX"]
+    AZURE_SEARCH_INDEX = os.environ["AZURE_SEARCH_INDEX_HACK"]
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT = "text-embedding-3-large"
     EMBEDDINGS_DIMENSIONS = 3072
 

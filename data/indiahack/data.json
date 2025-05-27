@@ -1,0 +1,26 @@
+[
+    {
+    "company": "Societe Generale",
+    "description": "Société Générale S.A. colloquially known in English-speaking countries as SocGen is a French multinational universal bank and financial services company founded in 1864. It is registered in downtown Paris and headquartered nearby in La Défense. Société Générale is France's third largest bank by total assets after BNP Paribas and Crédit Agricole.[4] It is also the sixth largest bank in Europe and the world's eighteenth.[4] It is considered to be a systemically important bank by the Financial Stability Board. It has been designated as a Significant Institution since the entry into force of European Banking Supervision in late 2014, and as a consequence is directly supervised by the European Central Bank.From 1966 to 2003 it was known as one of the Trois Vieilles (Old Three) major French commercial banks, along with Banque Nationale de Paris (from 2000 BNP Paribas) and Crédit Lyonnais."
+    },
+    {
+    "company": "Amadeus",
+    "description" : "Amadeus is a computer reservation system (or global distribution system, since it sells tickets for multiple airlines) owned by the Amadeus IT Group with headquarters in Madrid, Spain. The central database is located at Erding, Germany. The major development centres are located in Sophia Antipolis (France), Bangalore (India), London (UK), and Boston (United States). In addition to airlines, the CRS is also used to book train travel, cruises, car rental, ferry reservations, and hotel rooms. Amadeus also provides New Generation departure control systems to airlines.[1] Amadeus IT Group is a transaction processor for the global travel and tourism industry. The company is structured around two key related areas—its global distribution system and its IT Solutions business area."
+    },
+    {
+    "company" : "Saint Gobain",
+    "description" : "Compagnie de Saint-Gobain S.A. (French pronunciation: [sɛ̃ ɡɔbɛ̃]) is a French multinational corporation, founded in 1665 in Paris as the Manufacture royale de glaces de miroirs, and today headquartered on the outskirts of Paris, at La Défense and in Courbevoie. Originally a mirror manufacturer, it also produces a variety of construction, high-performance, and other materials. Saint-Gobain is present in 76 countries and as of 2022 employs more than 170,000 people."
+    },
+    {
+    "company": "Schneider Electric",
+    "description": "Schneider Electric SE is a French multinational corporation that specializes in digital automation and energy management. Registered as a Societas Europaea, Schneider Electric is a Fortune Global 500 company, publicly traded on the Euronext Exchange, and is a component of the Euro Stoxx 50 stock market index.[6] In fiscal year 2024, the company posted revenues of €38.15 billion. Schneider Electric is the parent company of Square D, APC, AVEVA and others. It is also a research company.[7]"
+    },
+    {
+    "company": "Worldline",
+    "description": "Worldline SA is a French fintech founded in 1972 and the world’s number 4 payments leader. Worldline covers the full payments value chain in France and Europe: issuing processing, payments acceptance, commercial acquiring and acquiring processing, as well as addition digital services for government bodies and companies, beyond payments. In 2024 Worldline generated a proforma revenue of €4.63 billion.[3]"
+    },
+    {
+    "company": "Siemens",
+    "description": "Siemens AG (German pronunciation: [ˈziːməns] ⓘ[3][4][5] or [-mɛns][5]) is a German multinational technology conglomerate. It is focused on industrial automation, distributed energy resources, rail transport and health technology.[6] Siemens is the largest industrial manufacturing company in Europe,[7] and holds the position of global market leader in industrial automation and industrial software.[8]"
+    }
+]
