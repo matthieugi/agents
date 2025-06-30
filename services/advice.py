@@ -55,13 +55,13 @@ def advice(messages):
         search_text=user_query, 
         top=2,
         vector_queries=[VectorizableTextQuery(
-            text=user_query, k_nearest_neighbors=5, fields="text_vector"
+            text=user_query, k_nearest_neighbors=5, fields="content_vector"
         )]
     )
 
     result = ""
     for r in search_results:
-        result += f"[{r['title']}]: {r['chunk']}\n-----\n"
+        result += f"[{r['title']}]: {r['content']}\n-----\n"
 
     query = advice_system_prompt.create_messages(messages=messages, documents=result, user_query=user_query)
 

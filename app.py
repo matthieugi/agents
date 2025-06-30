@@ -118,7 +118,7 @@ def process(user_id: str = None, user_query: str = None):
 
     return  { "role": "assistant", "content": answer_client_message_content }
 
-# if __name__ == '__main__':
-#     app.run(debug=True, port=os.environ.get('PORT', 5000))
+if __name__ == '__main__':
+    app.run(debug=True, port=os.environ.get('PORT', 5000))
 
-process("user_id", "est-ce que tu peux me générer un devis pour une assurance habitation, qui doit démarrer demain 27/02 et j'aimerais savoir quelle est sont les protections sur l'hébergement de chat ?")
+# process("user_id", "est-ce que tu peux me générer un devis pour une assurance habitation, qui doit démarrer demain 27/02 et j'aimerais savoir quelle est sont les protections sur l'hébergement de chat ?")
